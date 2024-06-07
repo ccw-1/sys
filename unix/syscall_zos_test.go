@@ -3843,6 +3843,11 @@ func TestTty(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Open %s %+v\n", sname, err)
 	}
+	if _, err = unix.Fcntl(uintptr(ptsfd), unix.F_CONTROL_CVT, &cvtreq); err != nil {
+
+		t.Fatalf("fcntl F_CONTROL_CVT ptsfd %+v\n", err)
+
+	}
 
 	tt := os.NewFile(uintptr(ptsfd), sname)
 	if err != nil {
@@ -3863,10 +3868,10 @@ func TestTty(t *testing.T) {
 		t.Fatalf("ptmx read %+v\n", err)
 	}
 	t.Logf("Buffer %+v\n", buffer[:n])
-	for i, j := range buffer[:n] {
-		if j != 145 {
-			t.Fatalf("Expected 145 at %d, received %d\n", i, j)
-		}
+
+	if !bytes.Equal(text, buffer[:n]) {
+		t.Fatalf("Expected %+v, read %+v\n", text, buffer[:n])
+
 	}
 
 }
